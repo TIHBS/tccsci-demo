@@ -1,9 +1,7 @@
 #!/bin/bash
 
-SLEEP_SECONDS=1
-FABRIC_CHANNEL_NAME="mychannel"
-FABRIC_CHAINCODE_NAME="fabric-rmsc"
 
+. ./Vars.sh
 
 echo -e "###############################"
 echo -e "####    Deploying Fabric   ####"
