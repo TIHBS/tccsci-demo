@@ -9,6 +9,8 @@ then
     NO_CACHE="--no-cache"
 fi
 
+./StartFabric.sh
+
 
 echo -e "\n\n"
 echo -e "##################################################"
@@ -41,12 +43,15 @@ echo -e "####    Deploying Ethereum Smart Contracts  ####"
 echo -e "################################################\n\n"
 sleep ${SLEEP_SECONDS}
 
+TRUFFLE_CONTAINER_ID=$(docker container ls --all --filter=ancestor=$GANACHE_IMAGE_ID --format "{{.ID}}" | tail -n 1)
+echo "Using 'truffle migrate' to deploy Ethereum smart contracts to blockchain on container $TRUFFLE_CONTAINER_ID."
+docker exec $TRUFFLE_CONTAINER_ID truffle migrate
 
 echo -e "\n\n"
 echo -e "###################################################"
 echo -e "####    Attaching to SCIP Gateway Container    ####"
 echo -e "###################################################\n\n"
 sleep ${SLEEP_SECONDS}
-CONTAINER_ID=$(docker container ls --all --filter=ancestor=$IMAGE_ID --format "{{.ID}}" | tail -n 1)
-echo "Attaching to $CONTAINER_ID. Press Ctrl+C to quit."
-docker container attach $CONTAINER_ID
+GATEWAY_CONTAINER_ID=$(docker container ls --all --filter=ancestor=$GATEWAY_IMAGE_ID --format "{{.ID}}" | tail -n 1)
+echo "Attaching to $GATEWAY_CONTAINER_ID. Press Ctrl+C to quit."
+docker container attach $GATEWAY_CONTAINER_ID

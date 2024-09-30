@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 . ./Vars.sh
 
 echo -e "\n\n"
