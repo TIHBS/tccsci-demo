@@ -1,0 +1,18 @@
+services:
+  ganache:
+    container_name: ganache-with-truffle
+    build:
+      context: ./ethereum
+    command: ["-m", "smart contract composition", "-e", "100000000", "-l", "471238800", "-g", "1", "-v", "-b", "3"]
+    ports:
+      - "7545:8545"
+    volumes:
+      - ./ethereum/smart-contracts:/truffle/smart-contracts/
+  scip-gateway:
+    container_name: scip-gateway
+    build:
+      context: ./scip-gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./fabric/fabric-samples/test-network/organizations:/root/.bal/crypto/

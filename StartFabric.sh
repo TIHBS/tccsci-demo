@@ -3,9 +3,10 @@
 
 . ./Vars.sh
 
+echo -e "\n\n"
 echo -e "###############################"
 echo -e "####    Deploying Fabric   ####"
-echo -e "###############################\n"
+echo -e "###############################\n\n"
 sleep ${SLEEP_SECONDS}
 
 cd fabric
@@ -17,9 +18,10 @@ else
     ./install-fabric.sh
 fi
 
+echo -e "\n\n"
 echo -e "######################################"
 echo -e "####    Starting Fabric Network   ####"
-echo -e "######################################\n"
+echo -e "######################################\n\n"
 sleep ${SLEEP_SECONDS}
 
 cd fabric-samples/test-network
@@ -27,9 +29,10 @@ cd fabric-samples/test-network
 ./network.sh up createChannel -c "$FABRIC_CHANNEL_NAME" -ca
 
 
+echo -e "\n\n"
 echo -e "###############################################"
 echo -e "####    Deploying Fabric Smart Contracts   ####"
-echo -e "###############################################\n"
+echo -e "###############################################\n\n"
 sleep ${SLEEP_SECONDS}
 
 cd ../..

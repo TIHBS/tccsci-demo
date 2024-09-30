@@ -7,12 +7,12 @@ FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY --from=clone /app/BlockchainAccessLayer /app/BlockchainAccessLayer
 COPY --from=clone /app/blockchain-access-layer-fabric-plugin /app/blockchain-access-layer-fabric-plugin
-COPY /scip-gateway/config/application.properties /app/BlockchainAccessLayer/src/main/resources
+COPY /config/application.properties /app/BlockchainAccessLayer/src/main/resources
 RUN mvn -f ./blockchain-access-layer-fabric-plugin/pom.xml package -DskipTests
 RUN mvn -f ./BlockchainAccessLayer/pom.xml package -DskipTests
 
 FROM eclipse-temurin:17 AS scip-gateway
-COPY --from=build /app/blockchain-access-layer-fabric-plugin/target/blockchain-access-layer-fabric-plugin-3.0.1-plugin.jar /root/plugins/
+COPY --from=build /app/blockchain-access-layer-fabric-plugin/target/blockchain-access-layer-fabric-plugin-3.0.2-plugin.jar /root/plugins/
 COPY --from=build /app/BlockchainAccessLayer/target/*.jar app.jar
-COPY /scip-gateway/config/connectionProfiles.json /root/.bal/
+COPY /config/connectionProfiles.json /root/.bal/
 ENTRYPOINT ["java","-jar","/app.jar"]
