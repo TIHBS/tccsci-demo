@@ -17,11 +17,7 @@ A Docker-based demo for SCIP and T-SCIP using a Hyplerdeger Fabric instance, a p
   - 17054
   - 18054
   - 19054
-
-
-
-
-
+- Ensure to replace the IP address provided in `/scip-gateway/connectionProfiles` with the external IP address of the host machine (found using `ipconfig` for example).
 
 ## Usage
 
@@ -64,25 +60,37 @@ curl --location 'http://localhost:8080?blockchain-id=fabric-0&blockchain=fabric&
     "jsonrpc": "2.0",
     "method": "Invoke",
     "params": {
-        "functionIdentifier": "isASeatAvailable",
-        "inputs": [
+        "signature": {
+            "name": "isASeatAvailable",
+            "function": "true",
+            "parameters": [
+                {
+                    "name": "txId",
+                    "type": "{ \"type\": \"string\" }",
+                    "value": ""
+                }
+            ]
+        },
+        "inputArguments": [
             {
                 "name": "txId",
-                "type": "{ \"type\": \"string\" }",
                 "value": "tx1"
             }
         ],
-        "outputs": [
+        "outputParams": [
             {
                 "name": "Result",
                 "type": "{ \"type\": \"string\" }"
             }
         ],
-        "doc": 0.99,
+        "callbackBinding": "json-rpc",
+        "nonce": 10,
+        "degreeOfConfidence": 99,
         "callbackUrl": "http://localhost:8080/submit-transaction/dummy",
         "timeout": 10000,
-        "correlationIdentifier": "abc",
-        "signature": ""
+        "correlationId": "abc",
+        "sideEffects": "true",
+        "digitalSignature": ""
     },
     "id": 123
 }'
