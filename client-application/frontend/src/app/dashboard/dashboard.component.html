@@ -1,0 +1,105 @@
+<form class="example-form">
+  <mat-form-field class="full-width">
+    <mat-label>SCL Address</mat-label>
+    <input matInput
+           placeholder="Ex. http://localhost:9090?blockchain=ethereum&blockchain-id=eth-0&address=0x580b1500e3cea21D4D85b001787791aE0011928b"
+           [(ngModel)]="scl" name="sclAddress">
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>SCIP Method</mat-label>
+    <mat-select [(value)]="method">
+      @for (method of scipMethods; track method) {
+        <mat-option [value]="method">{{ method }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</form>
+<div class="row">
+  <div class="col">
+    <div class="row">
+      <div class="col">
+        @if (method === ScipMethod.INVOKE) {
+          <form [formGroup]="invokeForm" novalidate (ngSubmit)="onSubmit()">
+            <mat-card class="shipping-card">
+              <mat-card-header>
+                <mat-card-title>Smart Contract Function Invocation</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <mat-label>Function name</mat-label>
+                      <mat-select formControlName="scFunction">
+                        @for (func of functionNames; track func) {
+                          <mat-option [value]="func">{{ func }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <input matInput placeholder="Argument 1" formControlName="parameter1Value">
+                      @if (invokeForm.controls['parameter1Value'].hasError('required')) {
+                        <mat-error>Argument 1 value is <strong>required</strong></mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <input matInput placeholder="Argument 2" formControlName="parameter2Value">
+                      @if (invokeForm.controls['parameter2Value'].hasError('required')) {
+                        <mat-error>Argument 2 value is <strong>required</strong></mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <input matInput placeholder="Argument 3" formControlName="parameter3Value">
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-raised-button color="primary" type="submit">Invoke</button>
+              </mat-card-actions>
+            </mat-card>
+          </form>
+        } @else {
+
+        }
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <mat-card class="shipping-card">
+          <mat-card-header>
+            <mat-card-title>Info:</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p><strong>Transaction Manager: </strong><span #tm>http://localhost:9090/</span> <a style="margin-left: 10px" (click)="copyText(tm.innerText)"><mat-icon>content_copy</mat-icon></a></p>
+            <p><strong>HotelMgtSC: </strong> <span #gateway>http://localhost:9090?blockchain=ethereum&blockchain-id=eth-0&address=0x580b1500e3cea21D4D85b001787791aE0011928b</span> <a style="margin-left: 10px" (click)="copyText(gateway.innerText)"><mat-icon>content_copy</mat-icon></a></p>
+            <p><strong>FlightMgtSC: </strong> <span #gateway>http://localhost:9090?blockchain=fabric&blockchain-id=fabric-0&mychannel%2Ffabric-rmsc%2FFlightBookingManager</span> <a style="margin-left: 10px" (click)="copyText(gateway.innerText)"><mat-icon>content_copy</mat-icon></a></p>
+
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <mat-card class="shipping-card">
+      <mat-card-header>
+        <mat-card-title>Event Log</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <textarea readonly class="log" [(ngModel)]="logMsg"></textarea>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
