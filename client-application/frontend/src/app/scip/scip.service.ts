@@ -1,42 +1,47 @@
 import { Injectable } from '@angular/core';
 import {Socket} from 'ngx-socket-io';
 import {Observable, take} from 'rxjs';
+import {ScFunction} from '../dashboard/model/sc-function';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScipService {
 
-  static readonly SCIP_GATEWAY = 'http://localhost:9090';
-  static readonly HOTEL_MANAGER_SC_ADDRESS = '0x580b1500e3cea21D4D85b001787791aE0011928b';
-  static readonly HOTEL_MANAGER_SCL = `${ScipService.SCIP_GATEWAY}?blockchain=ethereum&blockchain-id=eth-0&address=${ScipService.HOTEL_MANAGER_SC_ADDRESS}`
 
   constructor(private socket: Socket) {}
 
-  queryClientBalance(txId: string, tmId: string): Observable<string> {
-    let observable = this.socket.fromEvent<string>('queryClientBalanceResponse');
-    this.socket.emit('queryClientBalance', { txId: txId, tmId: tmId, scl: ScipService.HOTEL_MANAGER_SCL });
+  queryClientBalance(txId: string, tmId: string, scl: string): Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.QUERY_CLIENT_BALANCE}Response`);
+    this.socket.emit(ScFunction.QUERY_CLIENT_BALANCE, { txId: txId, tmId: tmId, scl: scl});
 
     return observable.pipe(take(1));
   }
 
-  isRoomAvailable(txId: string, tmId: string):Observable<string> {
-    let observable = this.socket.fromEvent<string>('isRoomAvailableResponse');
-    this.socket.emit('isRoomAvailable', { txId: txId, tmId: tmId, scl: ScipService.HOTEL_MANAGER_SCL });
+  isRoomAvailable(txId: string, tmId: string, scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.IS_ROOM_AVAILABLE}Response`);
+    this.socket.emit(ScFunction.IS_ROOM_AVAILABLE, { txId: txId, tmId: tmId, scl: scl });
 
     return observable.pipe(take(1));
   }
 
-  hasReservation(txId: string, tmId: string):Observable<string> {
-    let observable = this.socket.fromEvent<string>('hasReservationResponse');
-    this.socket.emit('hasReservation', { txId: txId, tmId: tmId, scl: ScipService.HOTEL_MANAGER_SCL });
+  hasReservation(txId: string, tmId: string, scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.HAS_RESERVATION}Response`);
+    this.socket.emit(ScFunction.HAS_RESERVATION, { txId: txId, tmId: tmId, scl: scl });
 
     return observable.pipe(take(1));
   }
 
-  queryRoomPrice(txId: string, tmId: string):Observable<string> {
-    let observable = this.socket.fromEvent<string>('queryRoomPriceResponse');
-    this.socket.emit('queryRoomPrice', { txId: txId, tmId: tmId, scl: ScipService.HOTEL_MANAGER_SCL });
+  queryRoomPrice(txId: string, tmId: string, scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.QUERY_ROOM_PRICE}Response`);
+    this.socket.emit(ScFunction.QUERY_ROOM_PRICE, { txId: txId, tmId: tmId, scl: scl });
+
+    return observable.pipe(take(1));
+  }
+
+  addToClientBalance(txId: string, tmId: string, amount: string | undefined | null, scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.ADD_TO_CLIENT_BALANCE}Response`);
+    this.socket.emit(ScFunction.ADD_TO_CLIENT_BALANCE, { txId: txId, tmId: tmId, amountToAdd: amount, scl: scl });
 
     return observable.pipe(take(1));
   }

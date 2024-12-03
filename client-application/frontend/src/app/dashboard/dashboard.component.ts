@@ -11,6 +11,7 @@ import {ScipService} from '../scip/scip.service';
 import {ScFunction} from './model/sc-function';
 import {interval, Observable, takeWhile} from 'rxjs';
 import {MatIconModule} from '@angular/material/icon';
+import {environment} from '../../environments/environment';
 
 
 @Component({
@@ -79,26 +80,37 @@ export class DashboardComponent {
       const arg1 = this.invokeForm.value.parameter1Value;
       const arg2 = this.invokeForm.value.parameter2Value;
       if (arg1 && arg2) {
-        this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+
         const arg3 = this.invokeForm.value.parameter3Value;
         let observable: Observable<string> | undefined;
 
         switch (functionName) {
           case ScFunction.QUERY_CLIENT_BALANCE:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
             this.startWaiting();
-            observable = this.scipService.queryClientBalance(arg1, arg2);
+            observable = this.scipService.queryClientBalance(arg1, arg2, this.scl);
             break;
           case ScFunction.IS_ROOM_AVAILABLE:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
             this.startWaiting();
-            observable = this.scipService.isRoomAvailable(arg1, arg2);
+            observable = this.scipService.isRoomAvailable(arg1, arg2, this.scl);
             break;
           case ScFunction.HAS_RESERVATION:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
             this.startWaiting();
-            observable = this.scipService.hasReservation(arg1, arg2);
+            observable = this.scipService.hasReservation(arg1, arg2, this.scl);
             break;
           case ScFunction.QUERY_ROOM_PRICE:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
             this.startWaiting();
-            observable = this.scipService.queryRoomPrice(arg1, arg2);
+            observable = this.scipService.queryRoomPrice(arg1, arg2, this.scl);
+            break;
+          case ScFunction.ADD_TO_CLIENT_BALANCE:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.addToClientBalance(arg1, arg2, arg3, this.scl)
+            }
             break;
         }
 
@@ -163,4 +175,11 @@ export class DashboardComponent {
       navigator.clipboard.writeText(text);
   }
 
+  isNumber(value?: string | null | undefined): boolean {
+    return ((value != null) &&
+      (value !== '') &&
+      !isNaN(Number(value.toString())));
+  }
+
+  protected readonly environment = environment;
 }
