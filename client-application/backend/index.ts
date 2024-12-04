@@ -108,6 +108,42 @@ io.on('connection', (client: any) => {
         handleInvoke(invocation, client, false);
     });
 
+    client.on(MethodNames.CHANGE_ROOM_PRICE, async (payload: { tmId: string, txId: string, newPrice: string, scl: string }) => {
+        console.log(`Received ${MethodNames.CHANGE_ROOM_PRICE}Request: `, payload);
+        const invocation = generateEthereumDtxInvocationWithoutReturn(
+            MethodNames.CHANGE_ROOM_PRICE,
+            payload.tmId,
+            payload.txId,
+            new Parameter("newPrice", SCDLTypes.UNSIGNED_256),
+            new Argument("newPrice", payload.newPrice),
+            payload.scl);
+        handleInvoke(invocation, client, false);
+    });
+
+    client.on(MethodNames.BOOK_ROOM, async (payload: { tmId: string, txId: string, scl: string }) => {
+        console.log(`Received ${MethodNames.BOOK_ROOM}Request: `, payload);
+        const invocation = generateEthereumDtxInvocationWithoutReturn(
+            MethodNames.BOOK_ROOM,
+            payload.tmId,
+            payload.txId,
+            null,
+            null,
+            payload.scl);
+        handleInvoke(invocation, client, false);
+    });
+
+    client.on(MethodNames.CHECKOUT, async (payload: { tmId: string, txId: string, scl: string }) => {
+        console.log(`Received ${MethodNames.CHECKOUT}Request: `, payload);
+        const invocation = generateEthereumDtxInvocationWithoutReturn(
+            MethodNames.CHECKOUT,
+            payload.tmId,
+            payload.txId,
+            null,
+            null,
+            payload.scl);
+        handleInvoke(invocation, client, false);
+    });
+
 });
 
 
@@ -136,8 +172,18 @@ function generateEthereumDtxInvocationWithoutReturn(methodName: string, tmId: st
     invocation.methodName = methodName;
     invocation.scl = scl;
     invocation.hasReturnValues = false;
-    invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.ETHEREUM_ADDRESS), inputParam];
-    invocation.inputArguments = [new Argument("txId", txId), new Argument("tm", tmId), inputArgument];
+    invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.ETHEREUM_ADDRESS)];
+
+    if (inputParam) {
+        invocation.inputParameters.push(inputParam);
+    }
+
+    invocation.inputArguments = [new Argument("txId", txId), new Argument("tm", tmId)];
+
+    if (inputArgument) {
+        invocation.inputArguments.push(inputArgument);
+    }
+
     invocation.outputParameters = [];
 
     return invocation;

@@ -46,5 +46,26 @@ export class ScipService {
     return observable.pipe(take(1));
   }
 
+  changeRoomPrice(txId: string, tmId: string, newPrice: string | undefined | null, scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.CHANGE_ROOM_PRICE}Response`);
+    this.socket.emit(ScFunction.CHANGE_ROOM_PRICE, { txId: txId, tmId: tmId, newPrice: newPrice, scl: scl });
+
+    return observable.pipe(take(1));
+  }
+
+  bookRoom(txId: string, tmId: string, scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.BOOK_ROOM}Response`);
+    this.socket.emit(ScFunction.BOOK_ROOM, { txId: txId, tmId: tmId, scl: scl });
+
+    return observable.pipe(take(1));
+  }
+
+  checkout(txId: string, tmId: string, scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScFunction.CHECKOUT}Response`);
+    this.socket.emit(ScFunction.CHECKOUT, { txId: txId, tmId: tmId, scl: scl });
+
+    return observable.pipe(take(1));
+  }
+
 
 }

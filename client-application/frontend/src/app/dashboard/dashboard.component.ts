@@ -112,6 +112,23 @@ export class DashboardComponent {
               observable = this.scipService.addToClientBalance(arg1, arg2, arg3, this.scl)
             }
             break;
+          case ScFunction.CHANGE_ROOM_PRICE:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.changeRoomPrice(arg1, arg2, arg3, this.scl);
+            }
+            break;
+          case ScFunction.BOOK_ROOM:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.bookRoom(arg1, arg2, this.scl);
+            break;
+          case ScFunction.CHECKOUT:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.checkout(arg1, arg2, this.scl);
+            break;
         }
 
         if (observable) {
