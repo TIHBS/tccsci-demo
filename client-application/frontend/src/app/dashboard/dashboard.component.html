@@ -71,8 +71,88 @@
               </mat-card-actions>
             </mat-card>
           </form>
-        } @else {
+        } @else if (method === ScipMethod.START) {
+          <button mat-button (click)="start()" [disabled]="!this.scl">Start</button>
+        } @else if (method === ScipMethod.REGISTER) {
+          <form [formGroup]="registerForm" novalidate (ngSubmit)="onSubmit()">
+            <mat-card class="shipping-card">
+              <mat-card-header>
+                <mat-card-title>Blockchain Registration</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <input matInput placeholder="Distributed Transaction Id" formControlName="txId">
+                      @if (registerForm.controls['txId'].hasError('required')) {
+                        <mat-error>Distributed transaction id is <strong>required</strong></mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <input matInput placeholder="Blockchain Id" formControlName="blockchainId">
+                      @if (registerForm.controls['blockchainId'].hasError('required')) {
+                        <mat-error>Blockchain id is <strong>required</strong></mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
 
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-raised-button color="primary" type="submit">Register</button>
+              </mat-card-actions>
+            </mat-card>
+          </form>
+        } @else if(method === ScipMethod.COMMIT) {
+          <form [formGroup]="commitForm" novalidate (ngSubmit)="onSubmit()">
+            <mat-card class="shipping-card">
+              <mat-card-header>
+                <mat-card-title>Commit Distributed Transaction</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <input matInput placeholder="Distributed Transaction Id" formControlName="txId">
+                      @if (commitForm.controls['txId'].hasError('required')) {
+                        <mat-error>Distributed transaction id is <strong>required</strong></mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-raised-button color="primary" type="submit">Commit</button>
+              </mat-card-actions>
+            </mat-card>
+          </form>
+        } @else {
+          <form [formGroup]="abortForm" novalidate (ngSubmit)="onSubmit()">
+            <mat-card class="shipping-card">
+              <mat-card-header>
+                <mat-card-title>Abort Distributed Transaction</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="row">
+                  <div class="col">
+                    <mat-form-field class="full-width">
+                      <input matInput placeholder="Distributed Transaction Id" formControlName="txId">
+                      @if (abortForm.controls['txId'].hasError('required')) {
+                        <mat-error>Distributed transaction id is <strong>required</strong></mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-raised-button color="primary" type="submit">Abort</button>
+              </mat-card-actions>
+            </mat-card>
+          </form>
         }
       </div>
     </div>

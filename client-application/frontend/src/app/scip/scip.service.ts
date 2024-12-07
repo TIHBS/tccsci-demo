@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {Socket} from 'ngx-socket-io';
 import {Observable, take} from 'rxjs';
 import {ScFunction} from '../dashboard/model/sc-function';
+import {ScipMethod} from '../dashboard/model/scip-method';
 
 @Injectable({
   providedIn: 'root'
@@ -53,19 +54,46 @@ export class ScipService {
     return observable.pipe(take(1));
   }
 
-  bookRoom(txId: string, tmId: string, scl: string):Observable<string> {
+  bookRoom(txId: string, tmId: string, scl: string): Observable<string> {
     let observable = this.socket.fromEvent<string>(`${ScFunction.BOOK_ROOM}Response`);
     this.socket.emit(ScFunction.BOOK_ROOM, { txId: txId, tmId: tmId, scl: scl });
 
     return observable.pipe(take(1));
   }
 
-  checkout(txId: string, tmId: string, scl: string):Observable<string> {
+  checkout(txId: string, tmId: string, scl: string): Observable<string> {
     let observable = this.socket.fromEvent<string>(`${ScFunction.CHECKOUT}Response`);
     this.socket.emit(ScFunction.CHECKOUT, { txId: txId, tmId: tmId, scl: scl });
 
     return observable.pipe(take(1));
   }
 
+  dtxStart(scl: string):Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScipMethod.START}Response`);
+    this.socket.emit(ScipMethod.START, { scl: scl });
+
+    return observable.pipe(take(1));
+  }
+
+  dtxRegister(scl: string, txId: string, blockchainId: string): Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScipMethod.REGISTER}Response`);
+    this.socket.emit(ScipMethod.REGISTER, {scl: scl, txId: txId, blockchainId: blockchainId});
+
+    return observable.pipe(take(1));
+  }
+
+  dtxCommit(scl: string, txId: string): Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScipMethod.COMMIT}Response`);
+    this.socket.emit(ScipMethod.COMMIT, {scl: scl, txId: txId});
+
+    return observable.pipe(take(1));
+  }
+
+  dtxAbort(scl: string, txId: string): Observable<string> {
+    let observable = this.socket.fromEvent<string>(`${ScipMethod.ABORT}Response`);
+    this.socket.emit(ScipMethod.ABORT, {scl: scl, txId: txId});
+
+    return observable.pipe(take(1));
+  }
 
 }

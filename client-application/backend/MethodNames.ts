@@ -7,4 +7,9 @@ export class MethodNames {
     public static readonly BOOK_ROOM = "bookRoom";
     public static readonly HAS_RESERVATION = "hasReservation";
     public static readonly CHECKOUT = "checkout";
+    public static readonly START = "DtxStart";
+    public static readonly REGISTER = "DtxRegister";
+    public static readonly COMMIT = "DtxCommit";
+    public static readonly ABORT = "DtxAbort";
+    public static readonly IS_ABORTED = "DtxIsAborted";
 }

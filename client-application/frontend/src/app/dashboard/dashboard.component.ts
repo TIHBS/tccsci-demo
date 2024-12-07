@@ -42,17 +42,33 @@ export class DashboardComponent {
   logMsg: string = "";
   isLoading: boolean = false;
 
-  private fb = inject(FormBuilder);
-  invokeForm = this.fb.group({
+  private invokeFormBuilder = inject(FormBuilder);
+  private registerFormBuilder = inject(FormBuilder);
+
+  invokeForm = this.invokeFormBuilder.group({
     scFunction: ['', Validators.required],
     parameter1Value: ['', Validators.required],
     parameter2Value: ['', Validators.required],
     parameter3Value: ['', null]
   });
 
+  registerForm = this.registerFormBuilder.group({
+    txId: ['', Validators.required],
+    blockchainId: ['', Validators.required]
+  });
+
+  commitForm = this.registerFormBuilder.group({
+    txId: ['', Validators.required]
+  });
+
+  abortForm = this.registerFormBuilder.group({
+    txId: ['', Validators.required]
+  });
+
   scipMethods: ScipMethod[] = [
+    ScipMethod.START,
     ScipMethod.INVOKE,
-    ScipMethod.PREPARE,
+    ScipMethod.REGISTER,
     ScipMethod.COMMIT,
     ScipMethod.ABORT
   ];
@@ -71,6 +87,12 @@ export class DashboardComponent {
   onSubmit(): void {
     if (this.method === ScipMethod.INVOKE) {
       this.invoke();
+    } else if (this.method === ScipMethod.REGISTER) {
+      this.register();
+    } else if (this.method === ScipMethod.COMMIT) {
+      this.commit();
+    }  else {
+      this.abort();
     }
   }
 
@@ -145,16 +167,56 @@ export class DashboardComponent {
 
   }
 
-  prepare(): void {
+  start(): void {
+    if (this.scl) {
+      this.addEvent(`Calling DtxStart on ${this.scl}`);
+      this.startWaiting();
+      this.scipService.dtxStart(this.scl).subscribe(msg => {
+        this.stopWaiting();
+        let myMsg = `DtxStart result: ${msg}`;
+        this.addEvent(myMsg);
+      });
+    }
+  }
 
+  register(): void {
+    if (this.scl && this.registerForm.value.blockchainId && this.registerForm.value.txId) {
+      const txId = this.registerForm.value.txId;
+      const blockchainId = this.registerForm.value.blockchainId;
+      this.addEvent(`Calling DtxRegister(txId=${txId}, blockchainId=${blockchainId}) on ${this.scl}`);
+      this.startWaiting();
+      this.scipService.dtxRegister(this.scl, txId, blockchainId).subscribe(msg => {
+        this.stopWaiting();
+        let myMsg = `DtxRegister result: ${msg}`;
+        this.addEvent(myMsg);
+      });
+    }
   }
 
   commit(): void {
-
+    if (this.scl &&  this.commitForm.value.txId) {
+      const txId = this.commitForm.value.txId;
+      this.addEvent(`Calling DtxCommit(txId=${txId}) on ${this.scl}`);
+      this.startWaiting();
+      this.scipService.dtxCommit(this.scl, txId).subscribe(msg => {
+        this.stopWaiting();
+        let myMsg = `DtxCommit result: ${msg}`;
+        this.addEvent(myMsg);
+      });
+    }
   }
 
   abort(): void {
-
+    if (this.scl &&  this.abortForm.value.txId) {
+      const txId = this.abortForm.value.txId;
+      this.addEvent(`Calling DtxAbort(txId=${txId}) on ${this.scl}`);
+      this.startWaiting();
+      this.scipService.dtxAbort(this.scl, txId).subscribe(msg => {
+        this.stopWaiting();
+        let myMsg = `DtxAbort result: ${msg}`;
+        this.addEvent(myMsg);
+      });
+    }
   }
 
   addEvent(msg: string): void {

@@ -14,6 +14,8 @@ import {QueryResponse} from "./model/scip/query-response";
 import dayjs from "dayjs";
 import {InvokeDtx} from "./model/t-scip/InvokeDtx";
 import {MethodNames} from "./MethodNames";
+import {DtxCommit} from "./model/t-scip/DtxCommit";
+import {DtxAbort} from "./model/t-scip/DtxAbort";
 
 const API_PORT = 5000;
 const JSON_RPC_PORT = 6000;
@@ -71,6 +73,29 @@ console.info(`Server listening on port ${JSON_RPC_PORT} (JSON-RPC)`);
 
 
 io.on('connection', (client: any) => {
+    /* 2PC4BC */
+    client.on(MethodNames.START, async (payload: {scl: string }) => {
+        console.log(`Received ${MethodNames.START}Request: `, payload);
+        handleStart(payload.scl, client);
+    });
+
+    client.on(MethodNames.REGISTER, async (payload: {scl: string, txId: string, blockchainId: string}) => {
+        console.log(`Received ${MethodNames.REGISTER}Request: `, payload);
+        handleRegister(payload.scl, client, payload.txId, payload.blockchainId);
+    });
+
+    client.on(MethodNames.COMMIT, async (payload: {scl: string, txId: string}) => {
+        console.log(`Received ${MethodNames.COMMIT}Request: `, payload);
+        handleCommit(payload.scl, client, payload.txId);
+    });
+
+    client.on(MethodNames.ABORT, async (payload: {scl: string, txId: string}) => {
+        console.log(`Received ${MethodNames.ABORT}Request: `, payload);
+        handleAbort(payload.scl, client, payload.txId);
+    });
+
+
+
     /* Hotel Manager */
     client.on(MethodNames.QUERY_CLIENT_BALANCE, async (payload: { tmId: string, txId: string, scl: string }) => {
         console.log(`Received ${MethodNames.QUERY_CLIENT_BALANCE}Request: `, payload);
@@ -151,9 +176,6 @@ httpServer.listen(API_PORT, () => {
     console.log(`Server listening on port ${API_PORT} (HTTP)`);
 });
 
-function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function generateEthereumDtxInvocationWithReturn(methodName: string, tmId: string, txId: string, outputParam: Parameter, scl: string): InvokeDtx {
     const invocation = new InvokeDtx();
@@ -189,6 +211,51 @@ function generateEthereumDtxInvocationWithoutReturn(methodName: string, tmId: st
     return invocation;
 }
 
+function readResult(invocation: InvokeDtx, client: any, websocketResponseName: string) {
+    const queryJsonRpcClient = getDefaultJsonRpcClient(invocation.scl);
+    const queryRequest = new QueryRequest();
+    const eventName = `${invocation.methodName.charAt(0).toUpperCase()}${invocation.methodName.substring(1)}Event`;
+    //queryRequest.filter = `txId == '${payload.txId}'`;
+    queryRequest.signature = new MemberSignature(eventName, false, invocation.outputParameters);
+
+    console.log("Submitting SCIP Query Request for: ", queryRequest.signature.name);
+
+    queryJsonRpcClient.request("Query", queryRequest).then((result: QueryResponse) => {
+        console.log("Received SCIP Query synchronous response including ", result.occurrences.length, " event occurrences");
+        const possiblyRelevant = result.occurrences.filter(oc => oc.parameters[0].value === invocation.inputArguments[0].value).sort((a, b) => {
+            return dayjs(a.isoTimestamp).isAfter(dayjs(b.isoTimestamp)) ? +1 : -1;
+        });
+        if (possiblyRelevant.length > 0) {
+            io.to(client.id).emit(websocketResponseName, possiblyRelevant[possiblyRelevant.length - 1].parameters.filter(p => p.name === invocation.outputParameters[1].name)[0].value);
+        } else {
+            io.to(client.id).emit(websocketResponseName, "The invocation reported no results!");
+        }
+    }, () => {
+        console.log("SCIP Query failed.");
+        io.to(client.id).emit(websocketResponseName, "querying results failed!");
+    });
+}
+
+function checkForAbort(invocation: InvokeDtx, client: any, websocketResponseName: string): void {
+    const isAbortedJsonRpcClient = getDefaultJsonRpcClient(invocation.scl);
+    const request = {dtxId: invocation.inputArguments[0].value};
+
+    console.log("Checking if the transaction", request.dtxId, " is aborted.");
+
+    isAbortedJsonRpcClient.request(MethodNames.IS_ABORTED, request).then((result: string) => {
+
+        if (result === "true") {
+            io.to(client.id).emit(websocketResponseName, `The transaction ${invocation.inputArguments[0].value} has been aborted due to lock violation!`);
+        } else {
+            // not aborted; read the results.
+            readResult(invocation, client, websocketResponseName);
+        }
+    }, (error) => {
+        console.log("Verifying the state of the transaction failed!");
+        io.to(client.id).emit(websocketResponseName, "Verifying transaction state failed!");
+    });
+}
+
 function handleInvoke(invocation: InvokeDtx, client: any, hasResponse: boolean) {
     const invokeRequest = new InvokeRequest();
     invokeRequest.callbackUrl = ADDRESS;
@@ -208,27 +275,11 @@ function handleInvoke(invocation: InvokeDtx, client: any, hasResponse: boolean) 
         requests.delete(invokeRequest.correlationId);
 
         if (isError) {
-            console.log("Received async SCIP error: ", payload);
-            io.to(client.id).emit(websocketResponseName, "Smart contract invocation failed: " + payload);
+            console.log("Received async SCIP error: ", payload.errorMessage);
+            io.to(client.id).emit(websocketResponseName, "Smart contract invocation failed: " + payload.errorMessage);
         } else {
             if (hasResponse) {
-                const queryJsonRpcClient = getDefaultJsonRpcClient(invocation.scl);
-                const queryRequest = new QueryRequest();
-                const eventName = `${invocation.methodName.charAt(0).toUpperCase()}${invocation.methodName.substring(1)}Event`;
-                // queryRequest.filter = `txId == ${payload.txId}`;
-                queryRequest.signature = new MemberSignature(eventName, false, invocation.outputParameters);
-
-                console.log("Submitting SCIP Query Request for: ", queryRequest.signature.name);
-                queryJsonRpcClient.request("Query", queryRequest).then((result: QueryResponse) => {
-                    result.occurrences.sort((a, b) => {
-                        return dayjs(a.isoTimestamp).isAfter(dayjs(b.isoTimestamp)) ? +1 : -1;
-                    });
-                    console.log("Received SCIP Query synchronous response including ", result.occurrences.length, " event occurrences");
-                    io.to(client.id).emit(websocketResponseName, result.occurrences[result.occurrences.length - 1].parameters.filter(p => p.name === invocation.outputParameters[1].name)[0].value);
-                }, () => {
-                    console.log("SCIP Query failed.");
-                    io.to(client.id).emit(websocketResponseName, "querying results failed!");
-                });
+                checkForAbort(invocation, client, websocketResponseName);
             } else {
                 console.log("Received async SCIP Invoke response: ", payload);
                 if (payload.errorCode) {
@@ -244,7 +295,7 @@ function handleInvoke(invocation: InvokeDtx, client: any, hasResponse: boolean) 
         console.log("Received SCIP Invoke synchronous response: ", result);
     }, (error) => {
         console.error("SCIP Invoke failed. Correlation Id: ", invokeRequest.correlationId, ". Reason: ", error);
-        io.to(client.id).emit(websocketResponseName, "Invoke failed: " + error);
+        io.to(client.id).emit(websocketResponseName, error.message);
     });
 
 }
@@ -274,4 +325,94 @@ function getDefaultJsonRpcClient(scl: string): JSONRPCClient {
     );
 
     return client;
+}
+
+function handleStart(scl: string, client: any): void {
+    let startRpcClient = getDefaultJsonRpcClient(scl);
+    startRpcClient.request(MethodNames.START, null).then(result => {
+        console.log("Received T-SCIP DtxStart response: ", result);
+        io.to(client.id).emit(`${MethodNames.START}Response`, result);
+    }, (error) => {
+        console.error("T-SCIP DtxStart failed. Reason: ", error);
+        io.to(client.id).emit(`${MethodNames.START}Response`, error.message);
+    });
+}
+
+function handleRegister(scl: string, client: any, txId: string, blockchainId: string): void {
+    let registerBcRpcClient = getDefaultJsonRpcClient(scl);
+    registerBcRpcClient.request(MethodNames.REGISTER, {dtxId: txId, blockchainId: blockchainId}).then(result => {
+        console.log("Received T-SCIP DtxRegister response: ", result);
+        io.to(client.id).emit(`${MethodNames.REGISTER}Response`, result);
+    }, (error) => {
+        console.error("T-SCIP DtxRegister failed. Reason: ", error);
+        io.to(client.id).emit(`${MethodNames.REGISTER}Response`, error.message);
+    });
+}
+
+function handleCommit(scl: string, client: any, txId: string): void {
+    let commitRequest = new DtxCommit();
+    commitRequest.dtxId = txId;
+    commitRequest.callbackUrl = ADDRESS;
+
+    const commitJsonRpcClient = getDefaultJsonRpcClient(scl);
+    const websocketResponseName = `${MethodNames.COMMIT}Response`;
+    console.log("Submitting SCIP DtxCommit Request. Transaction Id: ", commitRequest.dtxId);
+
+    requests.set(commitRequest.dtxId, (isError: boolean, payload: any) => {
+        requests.delete(commitRequest.dtxId);
+
+        if (isError) {
+            console.log("Received async T-SCIP error: ", payload.errorMessage);
+            io.to(client.id).emit(websocketResponseName, "Commit failed: " + payload.errorMessage);
+        } else {
+            console.log("Received async T-SCIP DtxCommit response: ", payload);
+
+            if (payload.errorCode) {
+                io.to(client.id).emit(websocketResponseName, payload.errorMessage);
+            } else {
+                io.to(client.id).emit(websocketResponseName, "Successful!");
+            }
+        }
+    });
+
+    commitJsonRpcClient.request(MethodNames.COMMIT, commitRequest).then(result => {
+        console.log("Received T-SCIP DtxCommit synchronous response: ", result);
+    }, (error) => {
+        console.error("T-SCIP DtxCommit failed. Transaction id: ", commitRequest.dtxId, ". Reason: ", error);
+        io.to(client.id).emit(websocketResponseName, error.message);
+    });
+}
+
+function handleAbort(scl: string, client: any, txId: string): void {
+    let abortRequest = new DtxAbort();
+    abortRequest.dtxId = txId;
+    abortRequest.callbackUrl = ADDRESS;
+
+    const abortJsonRpcClient = getDefaultJsonRpcClient(scl);
+    const websocketResponseName = `${MethodNames.ABORT}Response`;
+    console.log("Submitting SCIP DtxAbort Request. Transaction Id: ", abortRequest.dtxId);
+
+    requests.set(abortRequest.dtxId, (isError: boolean, payload: any) => {
+        requests.delete(abortRequest.dtxId);
+
+        if (isError) {
+            console.log("Received async T-SCIP error: ", payload.errorMessage);
+            io.to(client.id).emit(websocketResponseName, "Abort failed: " + payload.errorMessage);
+        } else {
+            console.log("Received async T-SCIP DtxAbort response: ", payload);
+
+            if (payload.errorCode) {
+                io.to(client.id).emit(websocketResponseName, payload.errorMessage);
+            } else {
+                io.to(client.id).emit(websocketResponseName, "Successful!");
+            }
+        }
+    });
+
+    abortJsonRpcClient.request(MethodNames.ABORT, abortRequest).then(result => {
+        console.log("Received T-SCIP DtxAbort synchronous response: ", result);
+    }, (error) => {
+        console.error("T-SCIP DtxAbort failed. Transaction id: ", abortRequest.dtxId, ". Reason: ", error);
+        io.to(client.id).emit(websocketResponseName, error.message);
+    });
 }
