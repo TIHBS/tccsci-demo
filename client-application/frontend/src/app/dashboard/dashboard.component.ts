@@ -204,10 +204,70 @@ export class DashboardComponent {
               observable = this.scipService.addToClientBalanceFabric(arg1, arg2, arg3, this.scl);
             }
             break;
+          case ScFunction.IS_SEAT_AVAILABLE:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.isSeatAvailable(arg1, arg2, arg3, this.scl);
+            }
+            break;
           case ScFunction.IS_A_SEAT_AVAILABLE:
             this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
             this.startWaiting();
             observable = this.scipService.isASeatAvailable(arg1, arg2, this.scl);
+            break;
+          case ScFunction.QUERY_NEXT_AVAILABLE_SEAT:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.queryNextAvailableSeat(arg1, arg2, this.scl);
+            break;
+          case ScFunction.IS_SEAT_BOOKED_BY_CLIENT:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.isSeatBookedByClient(arg1, arg2, arg3, this.scl);
+            }
+            break;
+          case ScFunction.QUERY_SEATS_COUNT:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.querySeatsCount(arg1, arg2, this.scl);
+            break;
+          case ScFunction.CHANGE_SEATS_COUNT:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.changeSeatsCount(arg1, arg2, arg3, this.scl);
+            }
+            break;
+          case ScFunction.QUERY_BOOKED_SEATS_COUNT:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.queryBookedSeatsCount(arg1, arg2, this.scl);
+            break;
+          case ScFunction.CHANGE_SEAT_PRICE:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.changeSeatPrice(arg1, arg2, arg3, this.scl);
+            }
+            break;
+          case ScFunction.QUERY_SEAT_PRICE:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.querySeatPrice(arg1, arg2, this.scl);
+            break;
+          case ScFunction.BOOK_SEAT:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.bookSeat(arg1, arg2, arg3, this.scl);
+            }
+            break;
+          case ScFunction.END_FLIGHT:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.endFlight(arg1, arg2, this.scl);
             break;
         }
 

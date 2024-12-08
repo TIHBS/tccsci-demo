@@ -32,7 +32,7 @@ export class ScipService {
     return observable.pipe(take(1));
   }
 
-  isSeatAvailable(txId: string, tmId: string, seatNumber: string, scl: string): Observable<string> {
+  isSeatAvailable(txId: string, tmId: string, seatNumber: string | undefined | null, scl: string): Observable<string> {
     let observable = this.socket.fromEvent<string>(`${ScFunction.IS_SEAT_AVAILABLE}Response`);
     this.socket.emit(ScFunction.IS_SEAT_AVAILABLE, { txId: txId, tmId: tmId, seatNumber: seatNumber, scl: scl});
 
@@ -53,7 +53,7 @@ export class ScipService {
     return observable.pipe(take(1));
   }
 
-  isSeatBookedByClient(txId: string, tmId: string, seatNumber: string, scl: string): Observable<string> {
+  isSeatBookedByClient(txId: string, tmId: string, seatNumber: string | undefined | null, scl: string): Observable<string> {
     let observable = this.socket.fromEvent<string>(`${ScFunction.IS_SEAT_BOOKED_BY_CLIENT}Response`);
     this.socket.emit(ScFunction.IS_SEAT_BOOKED_BY_CLIENT, { txId: txId, tmId: tmId, seatNumber: seatNumber, scl: scl});
 
@@ -67,7 +67,7 @@ export class ScipService {
     return observable.pipe(take(1));
   }
 
-  changeSeatsCount(txId: string, tmId: string, newCount: string, scl: string): Observable<string> {
+  changeSeatsCount(txId: string, tmId: string, newCount: string | undefined | null, scl: string): Observable<string> {
     let observable = this.socket.fromEvent<string>(`${ScFunction.CHANGE_SEATS_COUNT}Response`);
     this.socket.emit(ScFunction.CHANGE_SEATS_COUNT, { txId: txId, tmId: tmId, newCount: newCount, scl: scl});
 
@@ -81,7 +81,7 @@ export class ScipService {
     return observable.pipe(take(1));
   }
 
-  changeSeatPrice(txId: string, tmId: string, newPrice: string, scl: string): Observable<string> {
+  changeSeatPrice(txId: string, tmId: string, newPrice: string | undefined | null, scl: string): Observable<string> {
     let observable = this.socket.fromEvent<string>(`${ScFunction.CHANGE_SEAT_PRICE}Response`);
     this.socket.emit(ScFunction.CHANGE_SEAT_PRICE, { txId: txId, tmId: tmId, newPrice: newPrice, scl: scl});
 
@@ -95,7 +95,7 @@ export class ScipService {
     return observable.pipe(take(1));
   }
 
-  bookSeat(txId: string, tmId: string, seatNumber: string, scl: string): Observable<string> {
+  bookSeat(txId: string, tmId: string, seatNumber: string | undefined | null, scl: string): Observable<string> {
     let observable = this.socket.fromEvent<string>(`${ScFunction.BOOK_SEAT}Response`);
     this.socket.emit(ScFunction.BOOK_SEAT, { txId: txId, tmId: tmId, seatNumber: seatNumber, scl: scl});
 

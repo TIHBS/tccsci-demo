@@ -96,19 +96,91 @@ io.on('connection', (client: any) => {
     });
 
     /* Flight Manager */
-    client.on(MethodNames.IS_A_SEAT_AVAILABLE, async (payload: {scl: string, tmId: string, txId: string}) => {
-        console.log(`Received ${MethodNames.IS_A_SEAT_AVAILABLE}Request: `, payload);
-        let invocation = new InvokeDtx();
-        invocation.scl = payload.scl;
-        invocation.methodName = MethodNames.IS_A_SEAT_AVAILABLE;
-        invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.STRING)];
-        invocation.inputArguments = [new Argument("txId", payload.txId), new Argument("tm", payload.tmId)];
-        invocation.outputParameters = [new Parameter("return", SCDLTypes.STRING)];
-        invocation.hasReturnValues = true;
 
+    client.on(MethodNames.QUERY_CLIENT_BALANCE_FABRIC, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.QUERY_CLIENT_BALANCE_FABRIC, payload, null, null);
         handleInvoke(invocation, client, true);
     });
 
+    client.on(MethodNames.IS_A_SEAT_AVAILABLE, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.IS_A_SEAT_AVAILABLE, payload, null, null);
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.HAS_RESERVATION_FABRIC, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.HAS_RESERVATION_FABRIC, payload, null, null);
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.ADD_TO_CLIENT_BALANCE_FABRIC, async (payload: {scl: string, tmId: string, txId: string, amount: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.ADD_TO_CLIENT_BALANCE_FABRIC, payload,
+            new Parameter("amount", SCDLTypes.STRING), new Argument("amount", payload.amount));
+        handleInvoke(invocation, client, false);
+    });
+
+    client.on(MethodNames.IS_SEAT_AVAILABLE, async (payload: {scl: string, tmId: string, txId: string, seatNumber: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.ADD_TO_CLIENT_BALANCE_FABRIC, payload,
+            new Parameter("seatNumber", SCDLTypes.STRING), new Argument("seatNumber", payload.seatNumber));
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.IS_A_SEAT_AVAILABLE, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.IS_A_SEAT_AVAILABLE, payload, null, null);
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.QUERY_NEXT_AVAILABLE_SEAT, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.QUERY_NEXT_AVAILABLE_SEAT, payload, null, null);
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.IS_SEAT_BOOKED_BY_CLIENT, async (payload: {scl: string, tmId: string, txId: string, seatNumber: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.IS_SEAT_BOOKED_BY_CLIENT, payload,
+            new Parameter("seatNumber", SCDLTypes.STRING), new Argument("seatNumber", payload.seatNumber));
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.QUERY_SEATS_COUNT, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.QUERY_SEATS_COUNT, payload,
+            null, null);
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.CHANGE_SEATS_COUNT, async (payload: {scl: string, tmId: string, txId: string, newCount: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.CHANGE_SEATS_COUNT, payload,
+            new Parameter("newCount", SCDLTypes.STRING), new Argument("newCount", payload.newCount));
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.QUERY_BOOKED_SEATS_COUNT, async (payload: {scl: string, tmId: string, txId: string, newCount: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.QUERY_BOOKED_SEATS_COUNT, payload,
+            null, null);
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.CHANGE_SEAT_PRICE, async (payload: {scl: string, tmId: string, txId: string, newPrice: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.CHANGE_SEAT_PRICE, payload,
+            new Parameter("newCount", SCDLTypes.STRING), new Argument("newCount", payload.newPrice));
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.QUERY_SEAT_PRICE, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.QUERY_SEAT_PRICE, payload,
+            null, null);
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.BOOK_SEAT, async (payload: {scl: string, tmId: string, txId: string, seatNumber: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.BOOK_SEAT, payload,
+            new Parameter("seatNumber", SCDLTypes.STRING), new Argument("seatNumber", payload.seatNumber));
+        handleInvoke(invocation, client, true);
+    });
+
+    client.on(MethodNames.END_FLIGHT, async (payload: {scl: string, tmId: string, txId: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.END_FLIGHT, payload,
+            null, null);
+        handleInvoke(invocation, client, true);
+    });
 
     /* Hotel Manager */
     client.on(MethodNames.QUERY_CLIENT_BALANCE_ETHEREUM, async (payload: { tmId: string, txId: string, scl: string }) => {
@@ -201,14 +273,20 @@ function generateEthereumDtxInvocationWithReturn(methodName: string, tmId: strin
     return invocation;
 }
 
-function generateFabricDtxInvocationWithReturn(methodName: string, tmId: string, txId: string, outputParam: Parameter, scl: string): InvokeDtx {
+function generateFabricDtxInvocation(methodName: string, payload: {tmId: string, txId: string, scl: string}, inputParam: Parameter, inputArg: Argument): InvokeDtx {
+    console.log(`Received ${methodName}Request: `, payload);
     const invocation = new InvokeDtx();
     invocation.methodName = methodName;
-    invocation.scl = scl;
+    invocation.scl = payload.scl;
     invocation.hasReturnValues = true;
     invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.STRING)];
-    invocation.inputArguments = [new Argument("txId", txId), new Argument("tm", tmId)];
-    invocation.outputParameters = [new Parameter("txId", SCDLTypes.STRING), outputParam];
+    invocation.inputArguments = [new Argument("txId", payload.txId), new Argument("tm", payload.tmId)];
+    invocation.outputParameters = [new Parameter("txId", SCDLTypes.STRING)];
+
+    if (inputParam && inputArg) {
+        invocation.inputArguments.push(inputArg);
+        invocation.inputParameters.push(inputParam);
+    }
 
     return invocation;
 }
@@ -288,7 +366,7 @@ function handleInvoke(invocation: InvokeDtx, client: any, hasResponse: boolean) 
     invokeRequest.correlationId = crypto.randomUUID();
     invokeRequest.degreeOfConfidence = DOC;
     invokeRequest.sideEffects = true;
-    invokeRequest.signature = new MemberSignature(invocation.methodName, true, invocation.inputParameters);
+    invokeRequest.signature = new MemberSignature(invocation.methodName.split('_')[0], true, invocation.inputParameters);
     invokeRequest.inputArguments = invocation.inputArguments;
     invokeRequest.outputParams = invocation.outputParameters;
     invokeRequest.timeout = TIMEOUT;
