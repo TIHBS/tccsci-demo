@@ -16,6 +16,7 @@ import {InvokeDtx} from "./model/t-scip/InvokeDtx";
 import {MethodNames} from "./MethodNames";
 import {DtxCommit} from "./model/t-scip/DtxCommit";
 import {DtxAbort} from "./model/t-scip/DtxAbort";
+import {SCDLString} from "./model/scdl/SCDLString";
 
 const API_PORT = 5000;
 const JSON_RPC_PORT = 6000;
@@ -94,12 +95,25 @@ io.on('connection', (client: any) => {
         handleAbort(payload.scl, client, payload.txId);
     });
 
+    /* Flight Manager */
+    client.on(MethodNames.IS_A_SEAT_AVAILABLE, async (payload: {scl: string, tmId: string, txId: string}) => {
+        console.log(`Received ${MethodNames.IS_A_SEAT_AVAILABLE}Request: `, payload);
+        let invocation = new InvokeDtx();
+        invocation.scl = payload.scl;
+        invocation.methodName = MethodNames.IS_A_SEAT_AVAILABLE;
+        invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.STRING)];
+        invocation.inputArguments = [new Argument("txId", payload.txId), new Argument("tm", payload.tmId)];
+        invocation.outputParameters = [new Parameter("return", SCDLTypes.STRING)];
+        invocation.hasReturnValues = true;
+
+        handleInvoke(invocation, client, true);
+    });
 
 
     /* Hotel Manager */
-    client.on(MethodNames.QUERY_CLIENT_BALANCE, async (payload: { tmId: string, txId: string, scl: string }) => {
-        console.log(`Received ${MethodNames.QUERY_CLIENT_BALANCE}Request: `, payload);
-        const invocation = generateEthereumDtxInvocationWithReturn(MethodNames.QUERY_CLIENT_BALANCE, payload.tmId, payload.txId, new Parameter("clientBalance", SCDLTypes.UNSIGNED_256), payload.scl);
+    client.on(MethodNames.QUERY_CLIENT_BALANCE_ETHEREUM, async (payload: { tmId: string, txId: string, scl: string }) => {
+        console.log(`Received ${MethodNames.QUERY_CLIENT_BALANCE_ETHEREUM}Request: `, payload);
+        const invocation = generateEthereumDtxInvocationWithReturn(MethodNames.QUERY_CLIENT_BALANCE_ETHEREUM, payload.tmId, payload.txId, new Parameter("clientBalance", SCDLTypes.UNSIGNED_256), payload.scl);
         handleInvoke(invocation, client, true);
     });
 
@@ -109,9 +123,9 @@ io.on('connection', (client: any) => {
         handleInvoke(invocation, client, true);
     });
 
-    client.on(MethodNames.HAS_RESERVATION, async (payload: { tmId: string, txId: string, scl: string }) => {
-        console.log(`Received ${MethodNames.HAS_RESERVATION}Request: `, payload);
-        const invocation = generateEthereumDtxInvocationWithReturn(MethodNames.HAS_RESERVATION, payload.tmId, payload.txId, new Parameter("hasReservation", SCDLTypes.BOOLEAN), payload.scl);
+    client.on(MethodNames.HAS_RESERVATION_ETHEREUM, async (payload: { tmId: string, txId: string, scl: string }) => {
+        console.log(`Received ${MethodNames.HAS_RESERVATION_ETHEREUM}Request: `, payload);
+        const invocation = generateEthereumDtxInvocationWithReturn(MethodNames.HAS_RESERVATION_ETHEREUM, payload.tmId, payload.txId, new Parameter("hasReservation", SCDLTypes.BOOLEAN), payload.scl);
         handleInvoke(invocation, client, true);
     });
 
@@ -121,10 +135,10 @@ io.on('connection', (client: any) => {
         handleInvoke(invocation, client, true);
     });
 
-    client.on(MethodNames.ADD_TO_CLIENT_BALANCE, async (payload: { tmId: string, txId: string, amountToAdd: string, scl: string }) => {
+    client.on(MethodNames.ADD_TO_CLIENT_BALANCE_ETHEREUM, async (payload: { tmId: string, txId: string, amountToAdd: string, scl: string }) => {
         console.log(`Received ${MethodNames.QUERY_ROOM_PRICE}Request: `, payload);
         const invocation = generateEthereumDtxInvocationWithoutReturn(
-            MethodNames.ADD_TO_CLIENT_BALANCE,
+            MethodNames.ADD_TO_CLIENT_BALANCE_ETHEREUM,
             payload.tmId,
             payload.txId,
             new Parameter("amountToAdd", SCDLTypes.UNSIGNED_256),
@@ -168,9 +182,7 @@ io.on('connection', (client: any) => {
             payload.scl);
         handleInvoke(invocation, client, false);
     });
-
 });
-
 
 httpServer.listen(API_PORT, () => {
     console.log(`Server listening on port ${API_PORT} (HTTP)`);
@@ -183,6 +195,18 @@ function generateEthereumDtxInvocationWithReturn(methodName: string, tmId: strin
     invocation.scl = scl;
     invocation.hasReturnValues = true;
     invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.ETHEREUM_ADDRESS)];
+    invocation.inputArguments = [new Argument("txId", txId), new Argument("tm", tmId)];
+    invocation.outputParameters = [new Parameter("txId", SCDLTypes.STRING), outputParam];
+
+    return invocation;
+}
+
+function generateFabricDtxInvocationWithReturn(methodName: string, tmId: string, txId: string, outputParam: Parameter, scl: string): InvokeDtx {
+    const invocation = new InvokeDtx();
+    invocation.methodName = methodName;
+    invocation.scl = scl;
+    invocation.hasReturnValues = true;
+    invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.STRING)];
     invocation.inputArguments = [new Argument("txId", txId), new Argument("tm", tmId)];
     invocation.outputParameters = [new Parameter("txId", SCDLTypes.STRING), outputParam];
 
@@ -236,7 +260,7 @@ function readResult(invocation: InvokeDtx, client: any, websocketResponseName: s
     });
 }
 
-function checkForAbort(invocation: InvokeDtx, client: any, websocketResponseName: string): void {
+function checkForAbort(invocation: InvokeDtx, client: any, websocketResponseName: string, hasResult: boolean): void {
     const isAbortedJsonRpcClient = getDefaultJsonRpcClient(invocation.scl);
     const request = {dtxId: invocation.inputArguments[0].value};
 
@@ -246,13 +270,15 @@ function checkForAbort(invocation: InvokeDtx, client: any, websocketResponseName
 
         if (result === "true") {
             io.to(client.id).emit(websocketResponseName, `The transaction ${invocation.inputArguments[0].value} has been aborted due to lock violation!`);
-        } else {
+        } else if (hasResult) {
             // not aborted; read the results.
             readResult(invocation, client, websocketResponseName);
+        } else {
+            io.to(client.id).emit(websocketResponseName, "Successful!");
         }
     }, (error) => {
         console.log("Verifying the state of the transaction failed!");
-        io.to(client.id).emit(websocketResponseName, "Verifying transaction state failed!");
+        io.to(client.id).emit(websocketResponseName, "Verifying transaction state failed: " + error.message);
     });
 }
 
@@ -264,7 +290,7 @@ function handleInvoke(invocation: InvokeDtx, client: any, hasResponse: boolean) 
     invokeRequest.sideEffects = true;
     invokeRequest.signature = new MemberSignature(invocation.methodName, true, invocation.inputParameters);
     invokeRequest.inputArguments = invocation.inputArguments;
-    invokeRequest.outputParams = [];
+    invokeRequest.outputParams = invocation.outputParameters;
     invokeRequest.timeout = TIMEOUT;
 
     const invokeJsonRpcClient = getDefaultJsonRpcClient(invocation.scl);
@@ -274,19 +300,24 @@ function handleInvoke(invocation: InvokeDtx, client: any, hasResponse: boolean) 
     requests.set(invokeRequest.correlationId, (isError: boolean, payload: any) => {
         requests.delete(invokeRequest.correlationId);
 
-        if (isError) {
+        if (isError || payload.errorCode) {
             console.log("Received async SCIP error: ", payload.errorMessage);
             io.to(client.id).emit(websocketResponseName, "Smart contract invocation failed: " + payload.errorMessage);
         } else {
-            if (hasResponse) {
-                checkForAbort(invocation, client, websocketResponseName);
-            } else {
-                console.log("Received async SCIP Invoke response: ", payload);
-                if (payload.errorCode) {
-                    io.to(client.id).emit(websocketResponseName, payload.errorMessage);
-                } else {
+            console.log("Received async SCIP Invoke response: ", payload);
+
+            if (MethodNames.FLIGHT_MANAGER_FUNCTIONS.includes(invocation.methodName)) {
+                if (hasResponse) {
+                    if (payload && payload.parameters && payload.parameters.length > 0) {
+                        io.to(client.id).emit(websocketResponseName, payload.parameters[0].value);
+                    } else {
+                        io.to(client.id).emit(websocketResponseName, "null");
+                    }
+                }else {
                     io.to(client.id).emit(websocketResponseName, "Successful!");
                 }
+            } else {
+                checkForAbort(invocation, client, websocketResponseName, hasResponse);
             }
         }
     });

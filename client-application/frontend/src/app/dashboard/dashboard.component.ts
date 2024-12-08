@@ -13,6 +13,16 @@ import {interval, Observable, takeWhile} from 'rxjs';
 import {MatIconModule} from '@angular/material/icon';
 import {environment} from '../../environments/environment';
 
+interface Function {
+  value: ScFunction;
+  viewValue: string;
+}
+
+interface FunctionGroup {
+  name: string;
+  functions: Function[];
+}
+
 
 @Component({
   selector: 'app-dashboard',
@@ -73,15 +83,39 @@ export class DashboardComponent {
     ScipMethod.ABORT
   ];
 
-  functionNames: ScFunction[] = [
-    ScFunction.QUERY_CLIENT_BALANCE,
-    ScFunction.ADD_TO_CLIENT_BALANCE,
-    ScFunction.QUERY_ROOM_PRICE,
-    ScFunction.CHANGE_ROOM_PRICE,
-    ScFunction.HAS_RESERVATION,
-    ScFunction.IS_ROOM_AVAILABLE,
-    ScFunction.BOOK_ROOM,
-    ScFunction.CHECKOUT
+  functionNames: FunctionGroup[] = [
+    {
+      name: "Hotel Manager Smart Contract",
+      functions: [
+        { value : ScFunction.QUERY_CLIENT_BALANCE, viewValue : ScFunction.QUERY_CLIENT_BALANCE },
+        { value : ScFunction.ADD_TO_CLIENT_BALANCE, viewValue : ScFunction.ADD_TO_CLIENT_BALANCE },
+        { value : ScFunction.QUERY_ROOM_PRICE, viewValue : ScFunction.QUERY_ROOM_PRICE },
+        { value : ScFunction.CHANGE_ROOM_PRICE, viewValue : ScFunction.CHANGE_ROOM_PRICE },
+        { value : ScFunction.HAS_RESERVATION, viewValue : ScFunction.HAS_RESERVATION },
+        { value : ScFunction.IS_ROOM_AVAILABLE, viewValue : ScFunction.IS_ROOM_AVAILABLE },
+        { value : ScFunction.BOOK_ROOM, viewValue : ScFunction.BOOK_ROOM },
+        { value : ScFunction.CHECKOUT, viewValue : ScFunction.CHECKOUT }
+      ]
+    },
+    {
+      name: "Flight Manager Smart Contract",
+      functions: [
+        { value : ScFunction.QUERY_CLIENT_BALANCE_FABRIC, viewValue : "queryClientBalance" },
+        { value : ScFunction.HAS_RESERVATION_FABRIC, viewValue : "hasReservation" },
+        { value : ScFunction.ADD_TO_CLIENT_BALANCE_FABRIC, viewValue : "addToClientBalance" },
+        { value : ScFunction.IS_SEAT_AVAILABLE, viewValue : ScFunction.IS_SEAT_AVAILABLE },
+        { value : ScFunction.IS_A_SEAT_AVAILABLE, viewValue : ScFunction.IS_A_SEAT_AVAILABLE },
+        { value : ScFunction.QUERY_NEXT_AVAILABLE_SEAT, viewValue : ScFunction.QUERY_NEXT_AVAILABLE_SEAT },
+        { value : ScFunction.IS_SEAT_BOOKED_BY_CLIENT, viewValue : ScFunction.IS_SEAT_BOOKED_BY_CLIENT },
+        { value : ScFunction.QUERY_SEATS_COUNT, viewValue : ScFunction.QUERY_SEATS_COUNT },
+        { value : ScFunction.CHANGE_SEATS_COUNT, viewValue : ScFunction.CHANGE_SEATS_COUNT },
+        { value : ScFunction.QUERY_BOOKED_SEATS_COUNT, viewValue : ScFunction.QUERY_BOOKED_SEATS_COUNT },
+        { value : ScFunction.CHANGE_SEAT_PRICE, viewValue : ScFunction.CHANGE_SEAT_PRICE },
+        { value : ScFunction.QUERY_SEAT_PRICE, viewValue : ScFunction.QUERY_SEAT_PRICE },
+        { value : ScFunction.BOOK_SEAT, viewValue : ScFunction.BOOK_SEAT },
+        { value : ScFunction.END_FLIGHT, viewValue : ScFunction.END_FLIGHT }
+      ]
+    }
   ];
 
   onSubmit(): void {
@@ -150,6 +184,30 @@ export class DashboardComponent {
             this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
             this.startWaiting();
             observable = this.scipService.checkout(arg1, arg2, this.scl);
+            break;
+
+            /* Flight Management SC */
+          case ScFunction.QUERY_CLIENT_BALANCE_FABRIC:
+            this.addEvent(`Invoking ${functionName.split('_')[0]}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.queryClientBalanceFabric(arg1, arg2, this.scl);
+            break;
+          case ScFunction.HAS_RESERVATION_FABRIC:
+            this.addEvent(`Invoking ${functionName.split('_')[0]}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.hasReservationFabric(arg1, arg2, this.scl);
+            break;
+          case ScFunction.ADD_TO_CLIENT_BALANCE_FABRIC:
+            if (this.isNumber(arg3)) {
+              this.addEvent(`Invoking ${functionName.split('_')[0]}(${arg1},${arg2},${arg3} ) on ${this.scl}`);
+              this.startWaiting();
+              observable = this.scipService.addToClientBalanceFabric(arg1, arg2, arg3, this.scl);
+            }
+            break;
+          case ScFunction.IS_A_SEAT_AVAILABLE:
+            this.addEvent(`Invoking ${functionName}(${arg1},${arg2}) on ${this.scl}`);
+            this.startWaiting();
+            observable = this.scipService.isASeatAvailable(arg1, arg2, this.scl);
             break;
         }
 
