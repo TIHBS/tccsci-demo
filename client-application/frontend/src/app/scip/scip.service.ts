@@ -68,8 +68,8 @@ export class ScipService {
   }
 
   changeSeatsCount(txId: string, tmId: string, newCount: string | undefined | null, scl: string): Observable<string> {
-    let observable = this.socket.fromEvent<string>(`${ScFunction.CHANGE_SEATS_COUNT}Response`);
-    this.socket.emit(ScFunction.CHANGE_SEATS_COUNT, { txId: txId, tmId: tmId, newCount: newCount, scl: scl});
+    let observable = this.socket.fromEvent<string>(`${ScFunction.CHANGE_SEAT_COUNT}Response`);
+    this.socket.emit(ScFunction.CHANGE_SEAT_COUNT, { txId: txId, tmId: tmId, newCount: newCount, scl: scl});
 
     return observable.pipe(take(1));
   }

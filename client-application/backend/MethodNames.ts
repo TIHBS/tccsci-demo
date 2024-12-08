@@ -17,7 +17,7 @@ export class MethodNames {
     public static readonly QUERY_NEXT_AVAILABLE_SEAT = "queryNextAvailableSeat";
     public static readonly IS_SEAT_BOOKED_BY_CLIENT = "isSeatBookedByClient";
     public static readonly QUERY_SEATS_COUNT = "querySeatsCount";
-    public static readonly CHANGE_SEATS_COUNT = "changeSeatsCount";
+    public static readonly CHANGE_SEAT_COUNT = "changeSeatCount";
     public static readonly QUERY_BOOKED_SEATS_COUNT = "queryBookedSeatsCount";
     public static readonly CHANGE_SEAT_PRICE = "changeSeatPrice";
     public static readonly QUERY_SEAT_PRICE = "querySeatPrice";
@@ -33,7 +33,7 @@ export class MethodNames {
         MethodNames.QUERY_NEXT_AVAILABLE_SEAT,
         MethodNames.IS_SEAT_BOOKED_BY_CLIENT,
         MethodNames.QUERY_SEATS_COUNT,
-        MethodNames.CHANGE_SEATS_COUNT,
+        MethodNames.CHANGE_SEAT_COUNT,
         MethodNames.QUERY_BOOKED_SEATS_COUNT,
         MethodNames.CHANGE_SEAT_PRICE,
         MethodNames.QUERY_SEAT_PRICE,

@@ -18,7 +18,7 @@ export enum ScFunction {
   QUERY_NEXT_AVAILABLE_SEAT = "queryNextAvailableSeat",
   IS_SEAT_BOOKED_BY_CLIENT = "isSeatBookedByClient",
   QUERY_SEATS_COUNT = "querySeatsCount",
-  CHANGE_SEATS_COUNT = "changeSeatsCount",
+  CHANGE_SEAT_COUNT = "changeSeatCount",
   QUERY_BOOKED_SEATS_COUNT = "queryBookedSeatsCount",
   CHANGE_SEAT_PRICE = "changeSeatPrice",
   QUERY_SEAT_PRICE = "querySeatPrice",

@@ -108,7 +108,7 @@ export class DashboardComponent {
         { value : ScFunction.QUERY_NEXT_AVAILABLE_SEAT, viewValue : ScFunction.QUERY_NEXT_AVAILABLE_SEAT },
         { value : ScFunction.IS_SEAT_BOOKED_BY_CLIENT, viewValue : ScFunction.IS_SEAT_BOOKED_BY_CLIENT },
         { value : ScFunction.QUERY_SEATS_COUNT, viewValue : ScFunction.QUERY_SEATS_COUNT },
-        { value : ScFunction.CHANGE_SEATS_COUNT, viewValue : ScFunction.CHANGE_SEATS_COUNT },
+        { value : ScFunction.CHANGE_SEAT_COUNT, viewValue : ScFunction.CHANGE_SEAT_COUNT },
         { value : ScFunction.QUERY_BOOKED_SEATS_COUNT, viewValue : ScFunction.QUERY_BOOKED_SEATS_COUNT },
         { value : ScFunction.CHANGE_SEAT_PRICE, viewValue : ScFunction.CHANGE_SEAT_PRICE },
         { value : ScFunction.QUERY_SEAT_PRICE, viewValue : ScFunction.QUERY_SEAT_PRICE },
@@ -233,7 +233,7 @@ export class DashboardComponent {
             this.startWaiting();
             observable = this.scipService.querySeatsCount(arg1, arg2, this.scl);
             break;
-          case ScFunction.CHANGE_SEATS_COUNT:
+          case ScFunction.CHANGE_SEAT_COUNT:
             if (this.isNumber(arg3)) {
               this.addEvent(`Invoking ${functionName}(${arg1},${arg2},${arg3}) on ${this.scl}`);
               this.startWaiting();

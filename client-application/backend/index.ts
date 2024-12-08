@@ -119,7 +119,7 @@ io.on('connection', (client: any) => {
     });
 
     client.on(MethodNames.IS_SEAT_AVAILABLE, async (payload: {scl: string, tmId: string, txId: string, seatNumber: string}) => {
-        let invocation = generateFabricDtxInvocation(MethodNames.ADD_TO_CLIENT_BALANCE_FABRIC, payload,
+        let invocation = generateFabricDtxInvocation(MethodNames.IS_SEAT_AVAILABLE, payload,
             new Parameter("seatNumber", SCDLTypes.STRING), new Argument("seatNumber", payload.seatNumber));
         handleInvoke(invocation, client, true);
     });
@@ -146,10 +146,10 @@ io.on('connection', (client: any) => {
         handleInvoke(invocation, client, true);
     });
 
-    client.on(MethodNames.CHANGE_SEATS_COUNT, async (payload: {scl: string, tmId: string, txId: string, newCount: string}) => {
-        let invocation = generateFabricDtxInvocation(MethodNames.CHANGE_SEATS_COUNT, payload,
+    client.on(MethodNames.CHANGE_SEAT_COUNT, async (payload: {scl: string, tmId: string, txId: string, newCount: string}) => {
+        let invocation = generateFabricDtxInvocation(MethodNames.CHANGE_SEAT_COUNT, payload,
             new Parameter("newCount", SCDLTypes.STRING), new Argument("newCount", payload.newCount));
-        handleInvoke(invocation, client, true);
+        handleInvoke(invocation, client, false);
     });
 
     client.on(MethodNames.QUERY_BOOKED_SEATS_COUNT, async (payload: {scl: string, tmId: string, txId: string, newCount: string}) => {
@@ -161,7 +161,7 @@ io.on('connection', (client: any) => {
     client.on(MethodNames.CHANGE_SEAT_PRICE, async (payload: {scl: string, tmId: string, txId: string, newPrice: string}) => {
         let invocation = generateFabricDtxInvocation(MethodNames.CHANGE_SEAT_PRICE, payload,
             new Parameter("newCount", SCDLTypes.STRING), new Argument("newCount", payload.newPrice));
-        handleInvoke(invocation, client, true);
+        handleInvoke(invocation, client, false);
     });
 
     client.on(MethodNames.QUERY_SEAT_PRICE, async (payload: {scl: string, tmId: string, txId: string}) => {
@@ -173,13 +173,13 @@ io.on('connection', (client: any) => {
     client.on(MethodNames.BOOK_SEAT, async (payload: {scl: string, tmId: string, txId: string, seatNumber: string}) => {
         let invocation = generateFabricDtxInvocation(MethodNames.BOOK_SEAT, payload,
             new Parameter("seatNumber", SCDLTypes.STRING), new Argument("seatNumber", payload.seatNumber));
-        handleInvoke(invocation, client, true);
+        handleInvoke(invocation, client, false);
     });
 
     client.on(MethodNames.END_FLIGHT, async (payload: {scl: string, tmId: string, txId: string}) => {
         let invocation = generateFabricDtxInvocation(MethodNames.END_FLIGHT, payload,
             null, null);
-        handleInvoke(invocation, client, true);
+        handleInvoke(invocation, client, false);
     });
 
     /* Hotel Manager */
@@ -281,7 +281,7 @@ function generateFabricDtxInvocation(methodName: string, payload: {tmId: string,
     invocation.hasReturnValues = true;
     invocation.inputParameters = [new Parameter("txId", SCDLTypes.STRING), new Parameter("tm", SCDLTypes.STRING)];
     invocation.inputArguments = [new Argument("txId", payload.txId), new Argument("tm", payload.tmId)];
-    invocation.outputParameters = [new Parameter("txId", SCDLTypes.STRING)];
+    invocation.outputParameters = [new Parameter("return", SCDLTypes.STRING)];
 
     if (inputParam && inputArg) {
         invocation.inputArguments.push(inputArg);
