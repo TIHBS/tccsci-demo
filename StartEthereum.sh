@@ -45,15 +45,15 @@ TRUFFLE_CONTAINER_ID=$(docker container ls --all --filter=ancestor=$GANACHE_IMAG
 echo "Using 'truffle migrate' to deploy Ethereum smart contracts to blockchain on container $TRUFFLE_CONTAINER_ID."
 
 docker exec $TRUFFLE_CONTAINER_ID truffle migrate | tee migrate_output
-HOTEL_MANAGER_ADDRESS=grep "contract address:" migrate_output | awk -F  ":    " '{print $2}' | sed -n '4p'
-RESOURCE_MANAGER_ADDRESS=grep "contract address:" migrate_output | awk -F  ":    " '{print $2}' | sed -n '2p'
+HOTEL_MANAGER_ADDRESS=$(grep "contract address:" ./migrate_output | awk -F  ":    " '{print $2}' | sed -n '4p')
+RESOURCE_MANAGER_ADDRESS=$(grep "contract address:" ./migrate_output | awk -F  ":    " '{print $2}' | sed -n '2p')
 
 echo "Ethereum RMSC address is ${RESOURCE_MANAGER_ADDRESS}"
 echo "Ethereum HotelMgtSC address is ${HOTEL_MANAGER_ADDRESS}"
 sed -i -e "s/HOST/${HOST}/g" ./scip-gateway/config/connectionProfiles.json
 sed -i -e "s/HOST/${HOST}/g" ./client-application/frontend/src/environments/*.ts
 sed -i -e "s/RMSC/${RESOURCE_MANAGER_ADDRESS}/g" ./scip-gateway/config/connectionProfiles.json
-sed -i -e "s/HotelMgtSC/${HOTEL_MANAGER_ADDRESS}/g" ./client-application/frontend/src/environments/*.ts
+sed -i -e "s/ETH_ADDRESS/${HOTEL_MANAGER_ADDRESS}/g" ./client-application/frontend/src/environments/*.ts
 
 echo -e "\n\n"
 echo -e "##################################################"

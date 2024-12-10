@@ -6,16 +6,16 @@
       "cryptoPath": "/root/.bal/crypto/peerOrganizations/org1.example.com",
       "mspId": "Org1MSP",
       "overrideAuth": "peer0.org1.example.com",
-      "peerEndpoint": "192.168.178.47:7051",
+      "peerEndpoint": "HOST:7051",
       "resourceManagerSmartContractAddress": "mychannel/fabric-rmsc/ResourceManager"
     },
     "eth-0": {
       "@type": "ethereum",
-      "nodeUrl":"192.168.178.47:7545",
+      "nodeUrl":"HOST:7545",
       "keystorePath":"/root/.bal/ethereum/UTC--2019-05-30T11-21-08.970000000Z--90645dc507225d61cb81cf83e7470f5a6aa1215a.json",
       "keystorePassword":"123456789",
       "adversaryVotingRatio": 0.2,
       "pollingTimeSeconds": 2,
-      "resourceManagerSmartContractAddress": "0x423a7c656AdF8B96d1ea0C1fa5eF7d0be6C20B17"
+      "resourceManagerSmartContractAddress": "RMSC"
     }
   }
