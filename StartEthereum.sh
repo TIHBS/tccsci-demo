@@ -61,6 +61,9 @@ echo -e "#############    Deploying Gateway     ###########"
 echo -e "##################################################\n\n"
 sleep ${SLEEP_SECONDS}
 
+docker-compose build --no-cache scip-gateway
+docker compose up scip-gateway -d
+
 
 echo -e "\n\n"
 echo -e "###################################################"

@@ -15,8 +15,8 @@ RUN mvn -f ./blockchain-access-layer-ethereum-plugin/pom.xml package -DskipTests
 RUN mvn -f ./BlockchainAccessLayer/pom.xml package -DskipTests
 
 FROM eclipse-temurin:17 AS scip-gateway
-COPY --from=build /app/blockchain-access-layer-fabric-plugin/target/blockchain-access-layer-fabric-plugin-3.0.3-plugin.jar /root/plugins/
-COPY --from=build /app/blockchain-access-layer-ethereum-plugin/target/blockchain-access-layer-ethereum-plugin-3.0.3-plugin.jar /root/plugins/
+COPY --from=build /app/blockchain-access-layer-fabric-plugin/target/blockchain-access-layer-fabric-plugin-3.0.4-plugin.jar /root/plugins/
+COPY --from=build /app/blockchain-access-layer-ethereum-plugin/target/blockchain-access-layer-ethereum-plugin-3.0.4-plugin.jar /root/plugins/
 COPY --from=build /app/BlockchainAccessLayer/target/*.jar app.jar
 COPY /config/connectionProfiles.json /root/.bal/
 ENTRYPOINT ["java","-jar","/app.jar"]
