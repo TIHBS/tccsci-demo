@@ -7,12 +7,19 @@ echo -e "####    Deploying Fabric   ####"
 echo -e "###############################\n\n"
 sleep ${SLEEP_SECONDS}
 
-cd fabric
+if [ -d "fabric" ]; then
+    cd fabric
+else
+    mkdir "fabric"
+    cd fabric
+fi
 
 if [ -d "fabric-samples" ]; then
     echo "fabric-samples directory already exists..."
 else
-    echo "Directory fabric-samples does not exist. Running install-fabric.sh..."
+    echo "Directory fabric-samples does not exist. Downloading install-fabric.sh script..."
+    curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh && chmod +x install-fabric.sh
+    echo "Running install-fabric.sh..."
     ./install-fabric.sh
 fi
 

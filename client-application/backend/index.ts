@@ -16,7 +16,6 @@ import {InvokeDtx} from "./model/t-scip/InvokeDtx";
 import {MethodNames} from "./MethodNames";
 import {DtxCommit} from "./model/t-scip/DtxCommit";
 import {DtxAbort} from "./model/t-scip/DtxAbort";
-import {SCDLString} from "./model/scdl/SCDLString";
 
 const API_PORT = 5000;
 const JSON_RPC_PORT = 6000;
@@ -478,6 +477,8 @@ function handleCommit(scl: string, client: any, txId: string): void {
 
             if (payload.errorCode) {
                 io.to(client.id).emit(websocketResponseName, payload.errorMessage);
+            } else if (payload.verdict === "ABORT") {
+                io.to(client.id).emit(websocketResponseName, payload.message);
             } else {
                 io.to(client.id).emit(websocketResponseName, "Successful!");
             }

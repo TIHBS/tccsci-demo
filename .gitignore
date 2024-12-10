@@ -7,3 +7,4 @@ smart-contracts
 .idea/modules.xml
 .idea/misc.xml
 .idea/inspectionProfiles/Project_Default.xml
+fabric/install-fabric.sh

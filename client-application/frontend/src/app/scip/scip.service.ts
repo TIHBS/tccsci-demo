@@ -103,8 +103,8 @@ export class ScipService {
   }
 
   endFlight(txId: string, tmId: string, scl: string): Observable<string> {
-    let observable = this.socket.fromEvent<string>(`${ScFunction.BOOK_SEAT}Response`);
-    this.socket.emit(ScFunction.BOOK_SEAT, { txId: txId, tmId: tmId, scl: scl});
+    let observable = this.socket.fromEvent<string>(`${ScFunction.END_FLIGHT}Response`);
+    this.socket.emit(ScFunction.END_FLIGHT, { txId: txId, tmId: tmId, scl: scl});
 
     return observable.pipe(take(1));
   }
