@@ -11,7 +11,7 @@
     },
     "eth-0": {
       "@type": "ethereum",
-      "nodeUrl":"http://192.168.178.47:7545",
+      "nodeUrl":"192.168.178.47:7545",
       "keystorePath":"/root/.bal/ethereum/UTC--2019-05-30T11-21-08.970000000Z--90645dc507225d61cb81cf83e7470f5a6aa1215a.json",
       "keystorePassword":"123456789",
       "adversaryVotingRatio": 0.2,
