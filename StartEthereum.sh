@@ -61,8 +61,22 @@ echo -e "#############    Deploying Gateway     ###########"
 echo -e "##################################################\n\n"
 sleep ${SLEEP_SECONDS}
 
-docker-compose build --no-cache scip-gateway
+#docker-compose build --no-cache scip-gateway
 docker compose up scip-gateway -d
+
+
+echo -e "\n\n"
+echo -e "#############################################################"
+echo -e "#############    Deploying Client Application     ###########"
+echo -e "#############################################################\n\n"
+sleep ${SLEEP_SECONDS}
+
+if [[ ! -z "$NO_CACHE" ]]
+then
+    docker-compose build --no-cache client-backend
+fi
+
+docker compose up -e HOST=$HOST client-backend -d
 
 
 echo -e "\n\n"

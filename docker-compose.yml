@@ -13,6 +13,15 @@ services:
     build:
       context: ./scip-gateway
     ports:
-      - "8080:8080"
+      - "9090:8080"
     volumes:
       - ./fabric/fabric-samples/test-network/organizations:/root/.bal/crypto/
+  client-backend:
+    container_name: client-backend
+    build:
+      context: ./client-application/backend
+    environment:
+      - HOST
+    ports:
+      - 5000:5000
+      - 6000:6000
