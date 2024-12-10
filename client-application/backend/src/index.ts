@@ -22,7 +22,7 @@ const JSON_RPC_PORT = 6000;
 const DOC = 0.1;
 const TIMEOUT = 10000;
 const HOST = process.env.HOST || 'localhost';
-const ADDRESS = `${HOST}:${JSON_RPC_PORT}`;
+const ADDRESS = `http://${HOST}:${JSON_RPC_PORT}`;
 
 const app = express();
 app.use(bodyParser.json());

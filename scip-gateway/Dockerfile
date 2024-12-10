@@ -19,4 +19,5 @@ COPY --from=build /app/blockchain-access-layer-fabric-plugin/target/blockchain-a
 COPY --from=build /app/blockchain-access-layer-ethereum-plugin/target/blockchain-access-layer-ethereum-plugin-3.0.4-plugin.jar /root/plugins/
 COPY --from=build /app/BlockchainAccessLayer/target/*.jar app.jar
 COPY /config/connectionProfiles.json /root/.bal/
+COPY /ethereum/* /root/.bal/ethereum/
 ENTRYPOINT ["java","-jar","/app.jar"]

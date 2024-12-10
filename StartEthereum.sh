@@ -50,10 +50,15 @@ RESOURCE_MANAGER_ADDRESS=$(grep "contract address:" ./migrate_output | awk -F  "
 
 echo "Ethereum RMSC address is ${RESOURCE_MANAGER_ADDRESS}"
 echo "Ethereum HotelMgtSC address is ${HOTEL_MANAGER_ADDRESS}"
+yes | cp ./scip-gateway/config/.connectionProfiles.json ./scip-gateway/config/connectionProfiles.json
+yes | cp ./client-application/frontend/src/environments/.environment.development.ts ./client-application/frontend/src/environments/environment.development.ts
+yes | cp ./client-application/frontend/src/environments/.environment.ts ./client-application/frontend/src/environments/environment.ts
 sed -i -e "s/HOST/${HOST}/g" ./scip-gateway/config/connectionProfiles.json
-sed -i -e "s/HOST/${HOST}/g" ./client-application/frontend/src/environments/*.ts
+sed -i -e "s/HOST/${HOST}/g" ./client-application/frontend/src/environments/environment.ts
+sed -i -e "s/HOST/${HOST}/g" ./client-application/frontend/src/environments/environment.development.ts
 sed -i -e "s/RMSC/${RESOURCE_MANAGER_ADDRESS}/g" ./scip-gateway/config/connectionProfiles.json
-sed -i -e "s/ETH_ADDRESS/${HOTEL_MANAGER_ADDRESS}/g" ./client-application/frontend/src/environments/*.ts
+sed -i -e "s/ETH_ADDRESS/${HOTEL_MANAGER_ADDRESS}/g" ./client-application/frontend/src/environments/environment.ts
+sed -i -e "s/ETH_ADDRESS/${HOTEL_MANAGER_ADDRESS}/g" ./client-application/frontend/src/environments/environment.development.ts
 
 echo -e "\n\n"
 echo -e "##################################################"
@@ -74,6 +79,7 @@ if [[ -z "$NO_CACHE" ]]
 then
     echo "Copying updated connectionProfiles.json to container $GATEWAY_CONTAINER_ID"
     docker cp ./scip-gateway/config/connectionProfiles.json ${GATEWAY_CONTAINER_ID}:/root/.bal/connectionProfiles.json
+    docker cp ./scip-gateway/ethereum/ ${GATEWAY_CONTAINER_ID}:/root/.bal/
     docker compose restart scip-gateway
 fi
 
@@ -93,9 +99,18 @@ HOST=$HOST docker compose up client-backend -d
 
 
 echo -e "\n\n"
-echo -e "###################################################"
-echo -e "####    Attaching to SCIP Gateway Container    ####"
-echo -e "###################################################\n\n"
+echo -e "#############################################################"
+echo -e "#############    Starting Frontend     ######################"
+echo -e "#############################################################\n\n"
 sleep ${SLEEP_SECONDS}
-echo "Attaching to $GATEWAY_CONTAINER_ID. Press Ctrl+C to quit."
-docker container attach $GATEWAY_CONTAINER_ID
+
+cd client-application/frontend
+ng serve --host=0.0.0.0
+
+#echo -e "\n\n"
+#echo -e "###################################################"
+#echo -e "####    Attaching to SCIP Gateway Container    ####"
+#echo -e "###################################################\n\n"
+#sleep ${SLEEP_SECONDS}
+#echo "Attaching to $GATEWAY_CONTAINER_ID. Press Ctrl+C to quit."
+#docker container attach $GATEWAY_CONTAINER_ID
