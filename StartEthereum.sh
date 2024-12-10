@@ -61,8 +61,21 @@ echo -e "#############    Deploying Gateway     ###########"
 echo -e "##################################################\n\n"
 sleep ${SLEEP_SECONDS}
 
-#docker-compose build --no-cache scip-gateway
+if [[ ! -z "$NO_CACHE" ]]
+then
+    docker-compose build --no-cache scip-gateway
+fi
+
 docker compose up scip-gateway -d
+
+GATEWAY_CONTAINER_ID=$(docker container ls --all --filter=ancestor=$GATEWAY_IMAGE_ID --format "{{.ID}}" | tail -n 1)
+
+if [[ -z "$NO_CACHE" ]]
+then
+    echo "Copying updated connectionProfiles.json to container $GATEWAY_CONTAINER_ID"
+    docker cp ./scip-gateway/config/connectionProfiles.json ${GATEWAY_CONTAINER_ID}:/root/.bal/connectionProfiles.json
+    docker compose restart scip-gateway
+fi
 
 
 echo -e "\n\n"
@@ -76,7 +89,7 @@ then
     docker-compose build --no-cache client-backend
 fi
 
-docker compose up -e HOST=$HOST client-backend -d
+HOST=$HOST docker compose up client-backend -d
 
 
 echo -e "\n\n"
@@ -84,6 +97,5 @@ echo -e "###################################################"
 echo -e "####    Attaching to SCIP Gateway Container    ####"
 echo -e "###################################################\n\n"
 sleep ${SLEEP_SECONDS}
-GATEWAY_CONTAINER_ID=$(docker container ls --all --filter=ancestor=$GATEWAY_IMAGE_ID --format "{{.ID}}" | tail -n 1)
 echo "Attaching to $GATEWAY_CONTAINER_ID. Press Ctrl+C to quit."
 docker container attach $GATEWAY_CONTAINER_ID
