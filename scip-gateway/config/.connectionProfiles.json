@@ -6,7 +6,7 @@
       "cryptoPath": "/root/.bal/crypto/peerOrganizations/org1.example.com",
       "mspId": "Org1MSP",
       "overrideAuth": "peer0.org1.example.com",
-      "peerEndpoint": "http://HOST:7051",
+      "peerEndpoint": "HOST:7051",
       "resourceManagerSmartContractAddress": "mychannel/fabric-rmsc/ResourceManager"
     },
     "eth-0": {

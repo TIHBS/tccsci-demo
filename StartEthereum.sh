@@ -3,7 +3,7 @@
 . ./Vars.sh
 
 NO_CACHE=""
-HOST="192.168.178.47"
+
 
 if [[ "$1" == "no-cache" ]]
 then
